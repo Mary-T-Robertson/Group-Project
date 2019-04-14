@@ -13,25 +13,30 @@ FRAMES_PER_SECOND = 60 # speed of the program
 
 CLOCK = pygame.time.Clock()
 SURFACE = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-BACKGROUND_COLOR = (27, 160, 153)
-BOX_COLOR = (13, 81, 78)
+COLOR_TEAL = (27, 160, 153)
+COLOR_DARKTEAL = (13, 81, 78)
 
-# TODO: define some actual shapes and colors
-COLOR_1 = (0,0,0)
-COLOR_2 = (0,0,0)
-COLOR_3 = (0,0,0)
-COLOR_4 = (0,0,0)
+COLOR_GREEN = (  0, 255, 0)
+COLOR_BLUE = (0, 0, 255)
+COLOR_RED = (255, 0, 0)
+COLOR_YELLOW = (255, 255, 0)
+COLOR_WHITE = (255, 255, 255)
 
-SHAPE_1 = ("")
-SHAPE_2 = ("")
-SHAPE_3 = ("")
-SHAPE_4 = ("")
+BACKGROUND_COLOR = COLOR_TEAL
+BOX_COLOR = COLOR_DARKTEAL
 
-ICON_SHAPES = (SHAPE_1, SHAPE_2, SHAPE_3, SHAPE_4)
-ICON_COLORS = (COLOR_1, COLOR_2, COLOR_3, COLOR_4)
+CIRCLE = 'CIRCLE'
+DIAMOND = 'DIAMOND'
+OVAL = 'OVAL'
+SQUARE = 'SQUARE'
+
+ICON_SHAPES = (CIRCLE, DIAMOND, OVAL, SQUARE)
+ICON_COLORS = (COLOR_GREEN, COLOR_BLUE, COLOR_RED, COLOR_YELLOW)
+INSTRUCTION_TEXT = "Find all the matching pairs to win."
+WIN_TEXT = "You win!!!! Restarting game in 5 seconds..."
 
 def run():
-    # clear event queue to prevent mouse click from bleeding over from menu program
+    # clear event queue to prevent click event from bleeding over from menu program
     pygame.event.clear()
     pygame.init()
     pygame.display.set_caption('Simple Matching Game')
@@ -44,9 +49,8 @@ def run():
     firstSelection = None # stores the (col, row) position of the first box selected
 
     SURFACE.fill(BACKGROUND_COLOR)
-    # TODO: add title here something like "find matching pairs to win!"
+    
     initializeGame(gameBoard)
-
     while True: # main game loop
         mouseClicked = False
         SURFACE.fill(BACKGROUND_COLOR) # drawing the window
@@ -79,8 +83,10 @@ def run():
                         revealedBoxes[firstSelection[0]][firstSelection [1]] = False
                         revealedBoxes[col][row] = False
                     elif gameIsWon(revealedBoxes): # check if game has been won
-                        pygame.time.wait(2000)
-                        # TODO: Make the game say "You Win!"
+                        # draw win text and pause for 5 seconds
+                        drawBoard(gameBoard, revealedBoxes, WIN_TEXT)
+                        pygame.display.update()
+                        pygame.time.wait(5000)
                         # Reset the game board
                         gameBoard = generateRandomGameBoard()
                         revealedBoxes = generateGridState(False)
@@ -138,9 +144,20 @@ def findBoxAtCoordinates(x, y):
                 return (col, row)
     return (None, None)
 
-# TODO: Implement functionality to draw different shapes on top of box located at col,row address specified
 def drawIcon(shape, color, col, row):
-    return
+    quarter = int(BOX_SIZE * 0.25)
+    half = int(BOX_SIZE * 0.5)
+
+    left, top = getBoxOriginCoordinates(col, row)
+
+    if shape == CIRCLE:
+        pygame.draw.circle(SURFACE, color, (left + half, top + half), half - 5)
+    elif shape == DIAMOND:
+        pygame.draw.polygon(SURFACE, color, ((left + half, top), (left + BOX_SIZE - 1, top + half), (left + half, top + BOX_SIZE - 1), (left, top + half)))
+    elif shape == SQUARE:
+        pygame.draw.rect(SURFACE, color, (left + quarter, top + quarter, BOX_SIZE - half, BOX_SIZE - half))
+    elif shape == OVAL:
+        pygame.draw.ellipse(SURFACE, color, (left, top + quarter, BOX_SIZE, half))
 
 def getShapeAndColor(board, col, row):
     return board[col][row][0], board[col][row][1]
@@ -153,7 +170,8 @@ def drawBox(board, box):
     pygame.display.update()
     CLOCK.tick(FRAMES_PER_SECOND)
 
-def drawBoard(board, revealed):
+def drawBoard(board, revealed, title=INSTRUCTION_TEXT):
+    SURFACE.fill(BACKGROUND_COLOR)
     # Draw all the boxes
     for col in range(BOARD_COL_COUNT):
         for row in range(BOARD_ROW_COUNT):
@@ -165,6 +183,7 @@ def drawBoard(board, revealed):
                 # Draw a revealed box (icon)
                 shape, color = getShapeAndColor(board, col, row)
                 drawIcon(shape, color, col, row)
+    message_display(title)
 
 def initializeGame(board):
     #Draw the game board with all boxes covered
@@ -176,6 +195,17 @@ def gameIsWon(revealedBoxes):
         if False in i:
             return False
     return True
+
+def text_objects(text, font):
+    textSurface = font.render(text, True, COLOR_WHITE)
+    return textSurface, textSurface.get_rect()
+
+def message_display(text):
+    largeText = pygame.font.Font('freesansbold.ttf',20)
+    TextSurf, TextRect = text_objects(text, largeText)
+    TextRect.center = ((WINDOW_WIDTH/2),(VERTICAL_MARGIN/2))
+    SURFACE.blit(TextSurf, TextRect)
+    pygame.display.update()
 
 if __name__ == '__main__':
     run()
