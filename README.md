@@ -5,5 +5,5 @@ Mary Robertson
 Prachi (Ana) Kapur
 
 ***Notes***
-1) A group member left the class without finishing their part of the project.
+1) A group member left the class without finishing their part of the project so we are only able to deliver one game instead of two.
 2) We had trouble uploading our code segments to github so we met in person, figured out how to upload, and uploaded our parts together. 
